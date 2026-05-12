@@ -1,18 +1,34 @@
 import requests
 from bs4 import BeautifulSoup
 
-keyworld="파이썬"
-url = f"https://search.incruit.com/list/search.asp?col=job&kw={keyword}
-response = requests.get(url)
-# print(response.text)
+def search_incruit(keyword, pages):
+    jobs = []
+    for i in range(pages):
+        page = i * 30
 
-soup = BeautifulSoup(response.text, "html.parser")
+        url = f"https://search.incruit.com/list/search.asp?col=job&kw={keyword}&startno={page}"
+        response = requests.get(url)
 
-lis = soup.find_all("li", class_="c_col")
-# print(len(lis))
-# print(lis)
+        soup = BeautifulSoup(response.text, "html.parser")
 
-for li in lis[:1]:
-    company = li.find("a", class_="cpname")
-    print(company)
-    
+        lis = soup.find_all("li", class_="c_col")
+
+
+
+        for li in lis:
+            company = li.find("a", class_="cpname").text.strip()
+            title = li.find("div", class_="cell_mid").find("div", class_="cl_top").find("a").text.strip()
+            location = li.find("div", class_="cl_md").find_all("span")[0].text.strip()
+            link = li.find("div", class_="cell_mid").find("div", class_="cl_top").find("a").get("href")
+            print(link)
+
+            job_data = {
+                "company" : company,
+                "title" : title,
+                "location" : location,
+                "link" : link
+            }
+
+            jobs.append(job_data)
+
+        return jobs
